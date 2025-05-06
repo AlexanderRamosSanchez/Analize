@@ -105,6 +105,69 @@ public class FamilyServiceTest {
     }
 
     @Test
+    public void testCreateFamily_WithBasicService() {
+        // Given
+        FamilyDTO familyDTO = createSampleFamilyDTO(null);
+        BasicService basicService = createSampleBasicService(1);  // Asegúrate de que el ID no sea nulo
+        BasicService savedBasicService = createSampleBasicService(1);
+        Family savedFamily = createSampleFamily(1, "A");
+
+        familyDTO.setBasicService(basicService);
+
+        // Mocking the save methods
+        when(basicServiceRepository.save(any(BasicService.class))).thenReturn(Mono.just(savedBasicService));
+        when(familyRepository.save(any(Family.class))).thenReturn(Mono.just(savedFamily));
+        
+        // Mocking the findById to return a valid BasicService
+        when(basicServiceRepository.findById(1)).thenReturn(Mono.just(savedBasicService));
+
+        // Mock void method to do nothing
+        Mockito.doNothing().when(familyEventService).publishFamilyEvent(any(Family.class), eq("CREATED"));
+
+        // When & Then
+        StepVerifier.create(familyService.createFamily(familyDTO))
+                .expectNextMatches(dto ->
+                        dto.getId().equals(1) &&
+                                dto.getStatus().equals("A") &&
+                                dto.getBasicService() != null)
+                .verifyComplete();
+
+        verify(familyEventService).publishFamilyEvent(any(Family.class), eq("CREATED"));
+    }
+
+    @Test
+    public void testUpdateFamily_Success() {
+        // Given
+        Integer familyId = 1;
+        FamilyDTO familyDTO = createSampleFamilyDTO(familyId);
+        familyDTO.setLastName("Updated Last Name");
+
+        Family existingFamily = createSampleFamily(familyId, "A");
+        Family updatedFamily = createSampleFamily(familyId, "A");
+        updatedFamily.setLastName("Updated Last Name");
+
+        BasicService existingService = createSampleBasicService(familyId);
+        BasicService updatedService = createSampleBasicService(familyId);
+
+        when(familyRepository.findById(familyId)).thenReturn(Mono.just(existingFamily));
+        when(familyRepository.save(any(Family.class))).thenReturn(Mono.just(updatedFamily));
+        when(basicServiceRepository.findById(familyId)).thenReturn(Mono.just(existingService));
+        when(basicServiceRepository.save(any(BasicService.class))).thenReturn(Mono.just(updatedService));
+
+        // Mock void method to do nothing
+        Mockito.doNothing().when(familyEventService).publishFamilyEvent(any(Family.class), eq("UPDATED"));
+
+        // When & Then
+        StepVerifier.create(familyService.updateFamily(familyId, familyDTO))
+                .expectNextMatches(dto ->
+                        dto.getId().equals(familyId) &&
+                                dto.getLastName().equals("Updated Last Name"))
+                .verifyComplete();
+
+        verify(familyEventService).publishFamilyEvent(any(Family.class), eq("UPDATED"));
+    }
+
+    @Test
     public void testDeleteFamily_Success() {
         // Given
         Integer familyId = 1;
@@ -166,5 +229,57 @@ public class FamilyServiceTest {
         StepVerifier.create(familyService.activeFamily(familyId))
                 .expectError(IllegalArgumentException.class)
                 .verify();
+    }
+
+    // Helper method to create sample Family entity
+    private Family createSampleFamily(Integer id, String status) {
+        Family family = new Family();
+        family.setId(id);
+        family.setLastName("Test Family");
+        family.setDirection("123 Test Street");
+        family.setReasibAdmission("Testing");
+        family.setNumberMembers(4);
+        family.setNumberChildren(2);
+        family.setFamilyType("Nuclear");
+        family.setStatus(status);
+        family.setServiceId(id); // Link to BasicService
+        return family;
+    }
+
+    // Helper method to create sample BasicService entity
+    private BasicService createSampleBasicService(Integer id) {
+        return BasicService.builder()
+                .serviceId(id) // Asegúrate de que el ID no sea nulo
+                .waterService("Yes")
+                .servDrain("Yes")
+                .servLight("Yes")
+                .build();
+    }
+
+    // Helper method to create sample FamilyDTO
+    private FamilyDTO createSampleFamilyDTO(Integer id) {
+        FamilyDTO familyDTO = new FamilyDTO();
+        if (id != null) {
+            familyDTO.setId(id);
+        }
+        familyDTO.setLastName("Test Family");
+        familyDTO.setDirection("123 Test Street");
+        familyDTO.setReasibAdmission("Testing");
+        familyDTO.setNumberMembers(4);
+        familyDTO.setNumberChildren(2);
+        familyDTO.setFamilyType("Nuclear");
+        familyDTO.setStatus("A");
+
+        // Sample basic service
+        BasicService basicService = BasicService.builder()
+                .serviceId(id)
+                .waterService("Yes")
+                .servDrain("Yes")
+                .servLight("Yes")
+                .build();
+
+        familyDTO.setBasicService(basicService);
+
+        return familyDTO;
     }
 }
