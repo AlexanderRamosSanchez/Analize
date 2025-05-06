@@ -3,16 +3,17 @@ spring:
     name: vg-ms-family
 
   r2dbc:
-    url: r2dbc:postgresql://ep-damp-credit-a4bwf4tw-pooler.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
-    username: neondb_owner
-    password: npg_jnBdH2M7gwJz
+    # Conexión a la base de datos Family
+    url: ${R2DBC_URL} # r2dbc:postgresql://ep-damp-credit-a4bwf4tw-pooler.us-east-1.aws.neon.tech:5432/neondb?sslmode=require
+    username: ${R2DBC_USERNAME} # neondb_owner
+    password: ${R2DBC_PASSWORD} # npg_jnBdH2M7gwJz
     pool:
       max-size: 20
       min-size: 5
       validation-query: SELECT 1
 
   kafka:
-    bootstrap-servers: pkc-p11xm.us-east-1.aws.confluent.cloud:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS} # pkc-p11xm.us-east-1.aws.confluent.cloud:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -26,6 +27,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://securetoken.google.com/security-prs1
+
+  sql:
+    init:
+      mode: always
+      timeout: 10s
 
   logging:
     level:

@@ -10,18 +10,20 @@ import pe.edu.vallegrande.database.model.Family;
 public class FamilyEventService {
 
     private static final String TOPIC_NAME = "family-events";
+    private final KafkaTemplate<String, FamilyEvent> kafkaTemplate;
 
     @Autowired
-    private KafkaTemplate<String, FamilyEvent> kafkaTemplate;
+    public FamilyEventService(KafkaTemplate<String, FamilyEvent> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     public void publishFamilyEvent(Family family, String eventType) {
-        FamilyEvent event = new FamilyEvent(
+        FamilyEvent familyEvent = new FamilyEvent(
                 family.getId(),
                 eventType,
                 family.getLastName(),
                 family.getStatus()
         );
-
-        kafkaTemplate.send(TOPIC_NAME, String.valueOf(family.getId()), event);
+        kafkaTemplate.send(TOPIC_NAME, String.valueOf(family.getId()), familyEvent);
     }
 }

@@ -4,11 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import pe.edu.vallegrande.database.dto.FamilyDTO;
 import pe.edu.vallegrande.database.model.BasicService;
 import pe.edu.vallegrande.database.service.FamilyService;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -17,7 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-public class FamilyControllerTest {
+class FamilyControllerTest { // Modificador 'public' eliminado
 
     private FamilyController familyController;
     private FamilyService familyService;
@@ -34,7 +32,6 @@ public class FamilyControllerTest {
         FamilyDTO family1 = createSampleFamilyDTO(1);
         FamilyDTO family2 = createSampleFamilyDTO(2);
         when(familyService.findAllActive()).thenReturn(Flux.just(family1, family2));
-
         // When & Then
         StepVerifier.create(familyController.getAllActiveFamilies())
                 .expectNext(family1)
@@ -50,7 +47,6 @@ public class FamilyControllerTest {
         FamilyDTO family2 = createSampleFamilyDTO(2);
         family2.setStatus("I");
         when(familyService.findAllInactive()).thenReturn(Flux.just(family1, family2));
-
         // When & Then
         StepVerifier.create(familyController.getAllInactiveFamilies())
                 .expectNext(family1)
@@ -64,7 +60,6 @@ public class FamilyControllerTest {
         Integer familyId = 1;
         FamilyDTO family = createSampleFamilyDTO(familyId);
         when(familyService.findDetailById(familyId)).thenReturn(Mono.just(family));
-
         // When & Then
         StepVerifier.create(familyController.getFamilyDetailById(familyId))
                 .expectNextMatches(responseEntity ->
@@ -78,7 +73,6 @@ public class FamilyControllerTest {
         // Given
         Integer familyId = 999;
         when(familyService.findDetailById(familyId)).thenReturn(Mono.empty());
-
         // When & Then
         StepVerifier.create(familyController.getFamilyDetailById(familyId))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.NOT_FOUND)
@@ -91,7 +85,6 @@ public class FamilyControllerTest {
         Integer familyId = 1;
         FamilyDTO family = createSampleFamilyDTO(familyId);
         when(familyService.findById(familyId)).thenReturn(Mono.just(family));
-
         // When & Then
         StepVerifier.create(familyController.getFamilyById(familyId))
                 .expectNextMatches(responseEntity ->
@@ -105,7 +98,6 @@ public class FamilyControllerTest {
         // Given
         Integer familyId = 999;
         when(familyService.findById(familyId)).thenReturn(Mono.empty());
-
         // When & Then
         StepVerifier.create(familyController.getFamilyById(familyId))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.NOT_FOUND)
@@ -118,7 +110,6 @@ public class FamilyControllerTest {
         FamilyDTO familyToCreate = createSampleFamilyDTO(null);
         FamilyDTO createdFamily = createSampleFamilyDTO(1);
         when(familyService.createFamily(any(FamilyDTO.class))).thenReturn(Mono.just(createdFamily));
-
         // When & Then
         StepVerifier.create(familyController.createFamily(familyToCreate))
                 .expectNextMatches(responseEntity ->
@@ -132,7 +123,6 @@ public class FamilyControllerTest {
         // Given
         FamilyDTO familyToCreate = createSampleFamilyDTO(null);
         when(familyService.createFamily(any(FamilyDTO.class))).thenReturn(Mono.error(new RuntimeException("Error")));
-
         // When & Then
         StepVerifier.create(familyController.createFamily(familyToCreate))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.BAD_REQUEST)
@@ -147,7 +137,6 @@ public class FamilyControllerTest {
         FamilyDTO updatedFamily = createSampleFamilyDTO(familyId);
         updatedFamily.setLastName("Updated Last Name");
         when(familyService.updateFamily(eq(familyId), any(FamilyDTO.class))).thenReturn(Mono.just(updatedFamily));
-
         // When & Then
         StepVerifier.create(familyController.updateFamily(familyId, familyToUpdate))
                 .expectNextMatches(responseEntity ->
@@ -163,7 +152,6 @@ public class FamilyControllerTest {
         Integer familyId = 999;
         FamilyDTO familyToUpdate = createSampleFamilyDTO(familyId);
         when(familyService.updateFamily(eq(familyId), any(FamilyDTO.class))).thenReturn(Mono.empty());
-
         // When & Then
         StepVerifier.create(familyController.updateFamily(familyId, familyToUpdate))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.NOT_FOUND)
@@ -177,7 +165,6 @@ public class FamilyControllerTest {
         FamilyDTO familyToUpdate = createSampleFamilyDTO(familyId);
         when(familyService.updateFamily(eq(familyId), any(FamilyDTO.class)))
                 .thenReturn(Mono.error(new RuntimeException("Error")));
-
         // When & Then
         StepVerifier.create(familyController.updateFamily(familyId, familyToUpdate))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR)
@@ -189,7 +176,6 @@ public class FamilyControllerTest {
         // Given
         Integer familyId = 1;
         when(familyService.deleteFamily(familyId)).thenReturn(Mono.empty());
-
         // When & Then
         StepVerifier.create(familyController.deleteFamily(familyId))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.NO_CONTENT)
@@ -202,7 +188,6 @@ public class FamilyControllerTest {
         Integer familyId = 1;
         when(familyService.deleteFamily(familyId))
                 .thenReturn(Mono.error(new IllegalArgumentException("Familia no encontrada")));
-
         // When & Then
         StepVerifier.create(familyController.deleteFamily(familyId))
                 .expectNextMatches(responseEntity ->
@@ -216,7 +201,6 @@ public class FamilyControllerTest {
         // Given
         Integer familyId = 1;
         when(familyService.activeFamily(familyId)).thenReturn(Mono.empty());
-
         // When & Then
         StepVerifier.create(familyController.activeFamily(familyId))
                 .expectNextMatches(responseEntity -> responseEntity.getStatusCode() == HttpStatus.NO_CONTENT)
@@ -229,7 +213,6 @@ public class FamilyControllerTest {
         Integer familyId = 1;
         when(familyService.activeFamily(familyId))
                 .thenReturn(Mono.error(new IllegalArgumentException("Familia no encontrada")));
-
         // When & Then
         StepVerifier.create(familyController.activeFamily(familyId))
                 .expectNextMatches(responseEntity ->
@@ -251,7 +234,6 @@ public class FamilyControllerTest {
         familyDTO.setNumberChildren(2);
         familyDTO.setFamilyType("Nuclear");
         familyDTO.setStatus("A");
-
         // Sample basic service
         BasicService basicService = BasicService.builder()
                 .serviceId(id)
@@ -259,9 +241,7 @@ public class FamilyControllerTest {
                 .servDrain("Yes")
                 .servLight("Yes")
                 .build();
-
         familyDTO.setBasicService(basicService);
-
         return familyDTO;
     }
 }
