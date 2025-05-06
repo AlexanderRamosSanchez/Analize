@@ -108,7 +108,7 @@ public class FamilyServiceTest {
     public void testCreateFamily_WithBasicService() {
         // Given
         FamilyDTO familyDTO = createSampleFamilyDTO(null);
-        BasicService basicService = createSampleBasicService(null);
+        BasicService basicService = createSampleBasicService(1);  // Asegúrate de que el ID no sea nulo
         BasicService savedBasicService = createSampleBasicService(1);
         Family savedFamily = createSampleFamily(1, "A");
 
@@ -245,7 +245,7 @@ public class FamilyServiceTest {
     // Helper method to create sample BasicService entity
     private BasicService createSampleBasicService(Integer id) {
         return BasicService.builder()
-                .serviceId(id)
+                .serviceId(id) // Asegúrate de que el ID no sea nulo
                 .waterService("Yes")
                 .servDrain("Yes")
                 .servLight("Yes")
