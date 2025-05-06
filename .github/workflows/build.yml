@@ -9,6 +9,15 @@ jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
+
+    env:
+      R2DBC_URL: ${{ secrets.R2DBC_URL }}
+      R2DBC_USERNAME: ${{ secrets.R2DBC_USERNAME }}
+      R2DBC_PASSWORD: ${{ secrets.R2DBC_PASSWORD }}
+      KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
+      KAFKA_USERNAME: ${{ secrets.KAFKA_USERNAME }}
+      KAFKA_PASSWORD: ${{ secrets.KAFKA_PASSWORD }}
+      
     steps:
       - uses: actions/checkout@v4
         with:
