@@ -83,8 +83,26 @@ class BasicServiceMapperTest {
 
     @Test
     void updateFromDTONullServiceTest() {
-        // When & Then - No debe lanzar excepción
+        // When
         BasicServiceMapper.updateFromDTO(null, sourceService);
+
+        // Then - Verificamos que el servicio fuente no se ha modificado
+        assertEquals("Yes", sourceService.getWaterService());
+        assertEquals("Yes", sourceService.getServDrain());
+        assertEquals("Yes", sourceService.getServLight());
+        assertEquals("Yes", sourceService.getServCable());
+        assertEquals("Yes", sourceService.getServGas());
+        assertEquals("Large", sourceService.getArea());
+        assertEquals("New Location", sourceService.getReferenceLocation());
+        assertEquals("High", sourceService.getResidue());
+        assertEquals("Yes", sourceService.getPublicLighting());
+        assertEquals("High", sourceService.getSecurity());
+        assertEquals("Brick", sourceService.getMaterial());
+        assertEquals("Complete", sourceService.getFeeding());
+        assertEquals("High", sourceService.getEconomic());
+        assertEquals("Regular", sourceService.getSpiritual());
+        assertEquals("High", sourceService.getSocialCompany());
+        assertEquals("New Tip", sourceService.getGuideTip());
     }
 
     @Test
@@ -115,6 +133,7 @@ class BasicServiceMapperTest {
     @Test
     void updateFromDTOBothNullTest() {
         // When & Then - No debe lanzar excepción
-        BasicServiceMapper.updateFromDTO(null, null);
+        assertDoesNotThrow(() -> BasicServiceMapper.updateFromDTO(null, null));
     }
+
 }
