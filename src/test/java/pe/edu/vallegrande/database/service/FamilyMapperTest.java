@@ -132,30 +132,34 @@ class FamilyMapperTest {
         assertNull(result.getId()); // ID no se establece al convertir de DTO a Entity
 
         // Agrupando afirmaciones
-        assertEquals(testFamilyDTO.getLastName(), result.getLastName());
-        assertEquals(testFamilyDTO.getDirection(), result.getDirection());
-        assertEquals(testFamilyDTO.getReasibAdmission(), result.getReasibAdmission());
-        assertEquals(testFamilyDTO.getNumberMembers(), result.getNumberMembers());
-        assertEquals(testFamilyDTO.getNumberChildren(), result.getNumberChildren());
-        assertEquals(testFamilyDTO.getFamilyType(), result.getFamilyType());
-        assertEquals(testFamilyDTO.getSocialProblems(), result.getSocialProblems());
-        assertEquals(testFamilyDTO.getWeeklyFrequency(), result.getWeeklyFrequency());
-        assertEquals(testFamilyDTO.getFeedingType(), result.getFeedingType());
-        assertEquals(testFamilyDTO.getSafeType(), result.getSafeType());
-        assertEquals(testFamilyDTO.getFamilyDisease(), result.getFamilyDisease());
-        assertEquals(testFamilyDTO.getTreatment(), result.getTreatment());
-        assertEquals(testFamilyDTO.getDiseaseHistory(), result.getDiseaseHistory());
-        assertEquals(testFamilyDTO.getMedicalExam(), result.getMedicalExam());
-        assertEquals(testFamilyDTO.getTenure(), result.getTenure());
-        assertEquals(testFamilyDTO.getTypeOfHousing(), result.getTypeOfHousing());
-        assertEquals(testFamilyDTO.getHousingMaterial(), result.getHousingMaterial());
-        assertEquals(testFamilyDTO.getHousingSecurity(), result.getHousingSecurity());
-        assertEquals(testFamilyDTO.getHomeEnvironment(), result.getHomeEnvironment());
-        assertEquals(testFamilyDTO.getBedroomNumber(), result.getBedroomNumber());
-        assertEquals(testFamilyDTO.getHabitability(), result.getHabitability());
-        assertEquals(testFamilyDTO.getNumberRooms(), result.getNumberRooms());
-        assertEquals(testFamilyDTO.getNumberOfBedrooms(), result.getNumberOfBedrooms());
-        assertEquals(testFamilyDTO.getHabitabilityBuilding(), result.getHabitabilityBuilding());
+        assertFamilyEquals(testFamilyDTO, result);
+    }
+
+    private void assertFamilyEquals(FamilyDTO expected, Family actual) {
+        assertEquals(expected.getLastName(), actual.getLastName());
+        assertEquals(expected.getDirection(), actual.getDirection());
+        assertEquals(expected.getReasibAdmission(), actual.getReasibAdmission());
+        assertEquals(expected.getNumberMembers(), actual.getNumberMembers());
+        assertEquals(expected.getNumberChildren(), actual.getNumberChildren());
+        assertEquals(expected.getFamilyType(), actual.getFamilyType());
+        assertEquals(expected.getSocialProblems(), actual.getSocialProblems());
+        assertEquals(expected.getWeeklyFrequency(), actual.getWeeklyFrequency());
+        assertEquals(expected.getFeedingType(), actual.getFeedingType());
+        assertEquals(expected.getSafeType(), actual.getSafeType());
+        assertEquals(expected.getFamilyDisease(), actual.getFamilyDisease());
+        assertEquals(expected.getTreatment(), actual.getTreatment());
+        assertEquals(expected.getDiseaseHistory(), actual.getDiseaseHistory());
+        assertEquals(expected.getMedicalExam(), actual.getMedicalExam());
+        assertEquals(expected.getTenure(), actual.getTenure());
+        assertEquals(expected.getTypeOfHousing(), actual.getTypeOfHousing());
+        assertEquals(expected.getHousingMaterial(), actual.getHousingMaterial());
+        assertEquals(expected.getHousingSecurity(), actual.getHousingSecurity());
+        assertEquals(expected.getHomeEnvironment(), actual.getHomeEnvironment());
+        assertEquals(expected.getBedroomNumber(), actual.getBedroomNumber());
+        assertEquals(expected.getHabitability(), actual.getHabitability());
+        assertEquals(expected.getNumberRooms(), actual.getNumberRooms());
+        assertEquals(expected.getNumberOfBedrooms(), actual.getNumberOfBedrooms());
+        assertEquals(expected.getHabitabilityBuilding(), actual.getHabitabilityBuilding());
     }
 
     @Test
