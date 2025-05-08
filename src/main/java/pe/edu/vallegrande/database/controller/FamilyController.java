@@ -1,5 +1,7 @@
 package pe.edu.vallegrande.database.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v1/families")
 public class FamilyController {
 
+    private static final Logger logger = LoggerFactory.getLogger(FamilyController.class);
     private final FamilyService familyService;
 
     public FamilyController(FamilyService familyService) {
@@ -99,20 +102,21 @@ public class FamilyController {
     // Métodos privados para manejo de errores
 
     private Mono<ResponseEntity<FamilyDTO>> handleCreationError(Throwable e) {
-        e.printStackTrace();
+        logger.error("Error creating family", e);
         return Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
     private Mono<ResponseEntity<FamilyDTO>> handleUpdateError(Throwable e) {
-        e.printStackTrace();
+        logger.error("Error updating family", e);
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
     }
 
     private Mono<ResponseEntity<Object>> handleStatusChangeError(Throwable e) {
         if (e instanceof IllegalArgumentException) {
+            logger.warn("Family not found: {}", e.getMessage());
             return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()));
         }
-        e.printStackTrace();
+        logger.error("Error changing family status", e);
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ha ocurrido un error"));
     }
 }
