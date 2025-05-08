@@ -14,21 +14,24 @@ public class FamilyService {
     private final BasicServiceRepository basicServiceRepository;
     private final FamilyRepository familyRepository;
     private final FamilyEventService familyEventService;
+    private final FamilyMapper familyMapper;
 
     @Autowired
     public FamilyService(BasicServiceRepository basicServiceRepository,
                          FamilyRepository familyRepository,
-                         FamilyEventService familyEventService) {
+                         FamilyEventService familyEventService,
+                         FamilyMapper familyMapper) {
         this.basicServiceRepository = basicServiceRepository;
         this.familyRepository = familyRepository;
         this.familyEventService = familyEventService;
+        this.familyMapper = familyMapper;
     }
 
     /**
      * Mapea una entidad Family a un FamilyDTO incluyendo sus servicios básicos
      */
     public Mono<FamilyDTO> mapToFamilyDTO(Family family) {
-        FamilyDTO dto = mapFamilyToDTO(family);
+        FamilyDTO dto = familyMapper.toDTO(family);
 
         if (family.getServiceId() != null) {
             return basicServiceRepository.findById(family.getServiceId())
@@ -72,10 +75,9 @@ public class FamilyService {
      * Crea una nueva familia con sus servicios asociados
      */
     public Mono<FamilyDTO> createFamily(FamilyDTO familyDTO) {
-        Mono<BasicService> serviceOperation = createOrGetBasicService(familyDTO);
-
-        return serviceOperation.flatMap(savedBasicService -> {
-                    Family family = mapDTOToFamily(familyDTO);
+        return createOrGetBasicService(familyDTO)
+                .flatMap(savedBasicService -> {
+                    Family family = familyMapper.toEntity(familyDTO);
                     family.setStatus("A"); // Active by default
                     family.setServiceId(savedBasicService.getServiceId());
 
@@ -95,7 +97,7 @@ public class FamilyService {
     public Mono<FamilyDTO> updateFamily(Integer id, FamilyDTO familyDTO) {
         return familyRepository.findById(id)
                 .flatMap(existingFamily -> {
-                    updateFamilyFromDTO(existingFamily, familyDTO);
+                    familyMapper.updateEntityFromDTO(existingFamily, familyDTO);
                     Mono<Family> savedFamilyMono = familyRepository.save(existingFamily)
                             .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "UPDATED"));
 
@@ -114,26 +116,26 @@ public class FamilyService {
      * Desactiva lógicamente una familia
      */
     public Mono<Void> deleteFamily(Integer id) {
-        return familyRepository.findById(id)
-                .switchIfEmpty(Mono.error(new IllegalArgumentException("Familia no encontrada con ID: " + id)))
-                .flatMap(family -> {
-                    family.setStatus("I"); // Inactive
-                    return familyRepository.save(family)
-                            .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "DELETED"))
-                            .then();
-                });
+        return changeStatus(id, "I", "DELETED");
     }
 
     /**
      * Activa lógicamente una familia
      */
     public Mono<Void> activeFamily(Integer id) {
+        return changeStatus(id, "A", "UPDATED");
+    }
+
+    /**
+     * Método común para cambiar el estado de una familia
+     */
+    private Mono<Void> changeStatus(Integer id, String status, String eventType) {
         return familyRepository.findById(id)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Familia no encontrada con ID: " + id)))
                 .flatMap(family -> {
-                    family.setStatus("A"); // Active
+                    family.setStatus(status);
                     return familyRepository.save(family)
-                            .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "UPDATED"))
+                            .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, eventType))
                             .then();
                 });
     }
@@ -147,94 +149,6 @@ public class FamilyService {
 
     // Métodos privados auxiliares para mejorar la legibilidad
 
-    private FamilyDTO mapFamilyToDTO(Family family) {
-        FamilyDTO dto = new FamilyDTO();
-        dto.setId(family.getId());
-        dto.setLastName(family.getLastName());
-        dto.setDirection(family.getDirection());
-        dto.setReasibAdmission(family.getReasibAdmission());
-        dto.setNumberMembers(family.getNumberMembers());
-        dto.setNumberChildren(family.getNumberChildren());
-        dto.setFamilyType(family.getFamilyType());
-        dto.setSocialProblems(family.getSocialProblems());
-        dto.setWeeklyFrequency(family.getWeeklyFrequency());
-        dto.setFeedingType(family.getFeedingType());
-        dto.setSafeType(family.getSafeType());
-        dto.setFamilyDisease(family.getFamilyDisease());
-        dto.setTreatment(family.getTreatment());
-        dto.setDiseaseHistory(family.getDiseaseHistory());
-        dto.setMedicalExam(family.getMedicalExam());
-        dto.setTenure(family.getTenure());
-        dto.setTypeOfHousing(family.getTypeOfHousing());
-        dto.setHousingMaterial(family.getHousingMaterial());
-        dto.setHousingSecurity(family.getHousingSecurity());
-        dto.setHomeEnvironment(family.getHomeEnvironment());
-        dto.setBedroomNumber(family.getBedroomNumber());
-        dto.setHabitability(family.getHabitability());
-        dto.setNumberRooms(family.getNumberRooms());
-        dto.setNumberOfBedrooms(family.getNumberOfBedrooms());
-        dto.setHabitabilityBuilding(family.getHabitabilityBuilding());
-        dto.setStatus(family.getStatus());
-        return dto;
-    }
-
-    private Family mapDTOToFamily(FamilyDTO dto) {
-        Family family = new Family();
-        family.setLastName(dto.getLastName());
-        family.setDirection(dto.getDirection());
-        family.setReasibAdmission(dto.getReasibAdmission());
-        family.setNumberMembers(dto.getNumberMembers());
-        family.setNumberChildren(dto.getNumberChildren());
-        family.setFamilyType(dto.getFamilyType());
-        family.setSocialProblems(dto.getSocialProblems());
-        family.setWeeklyFrequency(dto.getWeeklyFrequency());
-        family.setFeedingType(dto.getFeedingType());
-        family.setSafeType(dto.getSafeType());
-        family.setFamilyDisease(dto.getFamilyDisease());
-        family.setTreatment(dto.getTreatment());
-        family.setDiseaseHistory(dto.getDiseaseHistory());
-        family.setMedicalExam(dto.getMedicalExam());
-        family.setTenure(dto.getTenure());
-        family.setTypeOfHousing(dto.getTypeOfHousing());
-        family.setHousingMaterial(dto.getHousingMaterial());
-        family.setHousingSecurity(dto.getHousingSecurity());
-        family.setHomeEnvironment(dto.getHomeEnvironment());
-        family.setBedroomNumber(dto.getBedroomNumber());
-        family.setHabitability(dto.getHabitability());
-        family.setNumberRooms(dto.getNumberRooms());
-        family.setNumberOfBedrooms(dto.getNumberOfBedrooms());
-        family.setHabitabilityBuilding(dto.getHabitabilityBuilding());
-        return family;
-    }
-
-    private void updateFamilyFromDTO(Family family, FamilyDTO dto) {
-        family.setLastName(dto.getLastName());
-        family.setDirection(dto.getDirection());
-        family.setReasibAdmission(dto.getReasibAdmission());
-        family.setNumberMembers(dto.getNumberMembers());
-        family.setNumberChildren(dto.getNumberChildren());
-        family.setFamilyType(dto.getFamilyType());
-        family.setSocialProblems(dto.getSocialProblems());
-        family.setWeeklyFrequency(dto.getWeeklyFrequency());
-        family.setFeedingType(dto.getFeedingType());
-        family.setSafeType(dto.getSafeType());
-        family.setFamilyDisease(dto.getFamilyDisease());
-        family.setTreatment(dto.getTreatment());
-        family.setDiseaseHistory(dto.getDiseaseHistory());
-        family.setMedicalExam(dto.getMedicalExam());
-        family.setTenure(dto.getTenure());
-        family.setTypeOfHousing(dto.getTypeOfHousing());
-        family.setHousingMaterial(dto.getHousingMaterial());
-        family.setHousingSecurity(dto.getHousingSecurity());
-        family.setHomeEnvironment(dto.getHomeEnvironment());
-        family.setBedroomNumber(dto.getBedroomNumber());
-        family.setHabitability(dto.getHabitability());
-        family.setNumberRooms(dto.getNumberRooms());
-        family.setNumberOfBedrooms(dto.getNumberOfBedrooms());
-        family.setHabitabilityBuilding(dto.getHabitabilityBuilding());
-        // Status no se actualiza para mantener consistencia
-    }
-
     private Mono<BasicService> createOrGetBasicService(FamilyDTO familyDTO) {
         if (familyDTO.getBasicService() != null) {
             return basicServiceRepository.save(familyDTO.getBasicService());
@@ -247,30 +161,11 @@ public class FamilyService {
         if (family.getServiceId() != null && familyDTO.getBasicService() != null) {
             return basicServiceRepository.findById(family.getServiceId())
                     .flatMap(existingService -> {
-                        updateBasicServiceFromDTO(existingService, familyDTO.getBasicService());
+                        BasicServiceMapper.updateFromDTO(existingService, familyDTO.getBasicService());
                         return basicServiceRepository.save(existingService)
                                 .thenReturn(family);
                     });
         }
         return Mono.empty();
-    }
-
-    private void updateBasicServiceFromDTO(BasicService service, BasicService dto) {
-        service.setWaterService(dto.getWaterService());
-        service.setServDrain(dto.getServDrain());
-        service.setServLight(dto.getServLight());
-        service.setServCable(dto.getServCable());
-        service.setServGas(dto.getServGas());
-        service.setArea(dto.getArea());
-        service.setReferenceLocation(dto.getReferenceLocation());
-        service.setResidue(dto.getResidue());
-        service.setPublicLighting(dto.getPublicLighting());
-        service.setSecurity(dto.getSecurity());
-        service.setMaterial(dto.getMaterial());
-        service.setFeeding(dto.getFeeding());
-        service.setEconomic(dto.getEconomic());
-        service.setSpiritual(dto.getSpiritual());
-        service.setSocialCompany(dto.getSocialCompany());
-        service.setGuideTip(dto.getGuideTip());
     }
 }
