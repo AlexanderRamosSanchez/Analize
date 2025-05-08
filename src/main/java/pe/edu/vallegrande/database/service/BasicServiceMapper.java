@@ -4,6 +4,11 @@ import pe.edu.vallegrande.database.model.BasicService;
 
 public class BasicServiceMapper {
 
+    // Constructor privado para prevenir instanciación
+    private BasicServiceMapper() {
+        // Este constructor está vacío porque no queremos permitir instancias de esta clase
+    }
+
     /**
      * Actualiza un servicio básico existente con datos de otro servicio
      */
