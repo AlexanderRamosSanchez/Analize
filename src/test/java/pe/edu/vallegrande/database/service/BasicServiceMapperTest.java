@@ -6,7 +6,7 @@ import pe.edu.vallegrande.database.model.BasicService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BasicServiceMapperTest {
+class BasicServiceMapperTest {
 
     private BasicService serviceToUpdate;
     private BasicService sourceService;

@@ -7,7 +7,7 @@ import pe.edu.vallegrande.database.model.Family;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FamilyMapperTest {
+class FamilyMapperTest {
 
     private FamilyMapper familyMapper;
     private Family testFamily;
