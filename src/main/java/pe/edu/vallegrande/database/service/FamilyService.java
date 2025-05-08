@@ -1,7 +1,10 @@
 package pe.edu.vallegrande.database.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import pe.edu.vallegrande.database.dto.FamilyDTO;
 import pe.edu.vallegrande.database.model.*;
 import pe.edu.vallegrande.database.repository.*;
@@ -11,6 +14,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class FamilyService {
 
+    private static final Logger logger = LoggerFactory.getLogger(FamilyService.class);
     private final BasicServiceRepository basicServiceRepository;
     private final FamilyRepository familyRepository;
     private final FamilyEventService familyEventService;
@@ -86,7 +90,7 @@ public class FamilyService {
                             .flatMap(this::mapToFamilyDTO);
                 })
                 .onErrorResume(e -> {
-                    e.printStackTrace();
+                    logger.error("Error creating family", e);
                     return Mono.error(new RuntimeException("Error durante la creación de la familia: " + e.getMessage()));
                 });
     }
@@ -107,7 +111,7 @@ public class FamilyService {
                 })
                 .flatMap(this::mapToFamilyDTO)
                 .onErrorResume(e -> {
-                    e.printStackTrace();
+                    logger.error("Error updating family", e);
                     return Mono.error(new RuntimeException("Error durante la actualización de la familia: " + e.getMessage()));
                 });
     }
