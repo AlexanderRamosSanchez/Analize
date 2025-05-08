@@ -86,31 +86,35 @@ class FamilyMapperTest {
         assertNotNull(result);
 
         // Agrupando afirmaciones
-        assertEquals(testFamily.getId(), result.getId());
-        assertEquals(testFamily.getLastName(), result.getLastName());
-        assertEquals(testFamily.getDirection(), result.getDirection());
-        assertEquals(testFamily.getReasibAdmission(), result.getReasibAdmission());
-        assertEquals(testFamily.getNumberMembers(), result.getNumberMembers());
-        assertEquals(testFamily.getNumberChildren(), result.getNumberChildren());
-        assertEquals(testFamily.getFamilyType(), result.getFamilyType());
-        assertEquals(testFamily.getSocialProblems(), result.getSocialProblems());
-        assertEquals(testFamily.getWeeklyFrequency(), result.getWeeklyFrequency());
-        assertEquals(testFamily.getFeedingType(), result.getFeedingType());
-        assertEquals(testFamily.getSafeType(), result.getSafeType());
-        assertEquals(testFamily.getFamilyDisease(), result.getFamilyDisease());
-        assertEquals(testFamily.getTreatment(), result.getTreatment());
-        assertEquals(testFamily.getMedicalExam(), result.getMedicalExam());
-        assertEquals(testFamily.getTenure(), result.getTenure());
-        assertEquals(testFamily.getTypeOfHousing(), result.getTypeOfHousing());
-        assertEquals(testFamily.getHousingMaterial(), result.getHousingMaterial());
-        assertEquals(testFamily.getHousingSecurity(), result.getHousingSecurity());
-        assertEquals(testFamily.getHomeEnvironment(), result.getHomeEnvironment());
-        assertEquals(testFamily.getBedroomNumber(), result.getBedroomNumber());
-        assertEquals(testFamily.getHabitability(), result.getHabitability());
-        assertEquals(testFamily.getNumberRooms(), result.getNumberRooms());
-        assertEquals(testFamily.getNumberOfBedrooms(), result.getNumberOfBedrooms());
-        assertEquals(testFamily.getHabitabilityBuilding(), result.getHabitabilityBuilding());
-        assertEquals(testFamily.getStatus(), result.getStatus());
+        assertFamilyDTOEquals(testFamily, result);
+    }
+
+    private void assertFamilyDTOEquals(Family expected, FamilyDTO actual) {
+        assertEquals(expected.getId(), actual.getId());
+        assertEquals(expected.getLastName(), actual.getLastName());
+        assertEquals(expected.getDirection(), actual.getDirection());
+        assertEquals(expected.getReasibAdmission(), actual.getReasibAdmission());
+        assertEquals(expected.getNumberMembers(), actual.getNumberMembers());
+        assertEquals(expected.getNumberChildren(), actual.getNumberChildren());
+        assertEquals(expected.getFamilyType(), actual.getFamilyType());
+        assertEquals(expected.getSocialProblems(), actual.getSocialProblems());
+        assertEquals(expected.getWeeklyFrequency(), actual.getWeeklyFrequency());
+        assertEquals(expected.getFeedingType(), actual.getFeedingType());
+        assertEquals(expected.getSafeType(), actual.getSafeType());
+        assertEquals(expected.getFamilyDisease(), actual.getFamilyDisease());
+        assertEquals(expected.getTreatment(), actual.getTreatment());
+        assertEquals(expected.getMedicalExam(), actual.getMedicalExam());
+        assertEquals(expected.getTenure(), actual.getTenure());
+        assertEquals(expected.getTypeOfHousing(), actual.getTypeOfHousing());
+        assertEquals(expected.getHousingMaterial(), actual.getHousingMaterial());
+        assertEquals(expected.getHousingSecurity(), actual.getHousingSecurity());
+        assertEquals(expected.getHomeEnvironment(), actual.getHomeEnvironment());
+        assertEquals(expected.getBedroomNumber(), actual.getBedroomNumber());
+        assertEquals(expected.getHabitability(), actual.getHabitability());
+        assertEquals(expected.getNumberRooms(), actual.getNumberRooms());
+        assertEquals(expected.getNumberOfBedrooms(), actual.getNumberOfBedrooms());
+        assertEquals(expected.getHabitabilityBuilding(), actual.getHabitabilityBuilding());
+        assertEquals(expected.getStatus(), actual.getStatus());
     }
 
     @Test
@@ -210,8 +214,17 @@ class FamilyMapperTest {
 
     @Test
     void updateEntityFromDTONullEntityTest() {
-        // When & Then - No debe lanzar excepción
+        // Given
+        Family originalFamily = new Family();
+        originalFamily.setId(2);
+        originalFamily.setLastName("Original Name");
+
+        // When
         familyMapper.updateEntityFromDTO(null, testFamilyDTO);
+
+        // Then
+        assertEquals(2, originalFamily.getId());
+        assertEquals("Original Name", originalFamily.getLastName());
     }
 
     @Test
