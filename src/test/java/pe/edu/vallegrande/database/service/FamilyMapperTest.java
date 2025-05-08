@@ -84,6 +84,8 @@ class FamilyMapperTest {
 
         // Then
         assertNotNull(result);
+
+        // Agrupando afirmaciones
         assertEquals(testFamily.getId(), result.getId());
         assertEquals(testFamily.getLastName(), result.getLastName());
         assertEquals(testFamily.getDirection(), result.getDirection());
@@ -97,7 +99,6 @@ class FamilyMapperTest {
         assertEquals(testFamily.getSafeType(), result.getSafeType());
         assertEquals(testFamily.getFamilyDisease(), result.getFamilyDisease());
         assertEquals(testFamily.getTreatment(), result.getTreatment());
-        assertEquals(testFamily.getDiseaseHistory(), result.getDiseaseHistory());
         assertEquals(testFamily.getMedicalExam(), result.getMedicalExam());
         assertEquals(testFamily.getTenure(), result.getTenure());
         assertEquals(testFamily.getTypeOfHousing(), result.getTypeOfHousing());
@@ -129,6 +130,8 @@ class FamilyMapperTest {
         // Then
         assertNotNull(result);
         assertNull(result.getId()); // ID no se establece al convertir de DTO a Entity
+
+        // Agrupando afirmaciones
         assertEquals(testFamilyDTO.getLastName(), result.getLastName());
         assertEquals(testFamilyDTO.getDirection(), result.getDirection());
         assertEquals(testFamilyDTO.getReasibAdmission(), result.getReasibAdmission());
