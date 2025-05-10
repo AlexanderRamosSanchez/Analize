@@ -11,6 +11,8 @@ import pe.edu.vallegrande.database.repository.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Service
 public class FamilyService {
 
@@ -103,6 +105,7 @@ public class FamilyService {
 
                     Family family = familyMapper.toEntity(familyDTO);
                     family.setStatus("A"); // Active by default
+                    family.setCreated(LocalDateTime.now());
                     
                     if (savedBasicService.getServiceId() != null) {
                         family.setServiceId(savedBasicService.getServiceId());
