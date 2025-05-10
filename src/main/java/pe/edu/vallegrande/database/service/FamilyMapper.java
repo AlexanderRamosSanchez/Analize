@@ -32,16 +32,9 @@ public class FamilyMapper {
         dto.setDiseaseHistory(family.getDiseaseHistory());
         dto.setMedicalExam(family.getMedicalExam());
         dto.setTenure(family.getTenure());
-        dto.setTypeOfHousing(family.getTypeOfHousing());
-        dto.setHousingMaterial(family.getHousingMaterial());
-        dto.setHousingSecurity(family.getHousingSecurity());
-        dto.setHomeEnvironment(family.getHomeEnvironment());
-        dto.setBedroomNumber(family.getBedroomNumber());
-        dto.setHabitability(family.getHabitability());
-        dto.setNumberRooms(family.getNumberRooms());
-        dto.setNumberOfBedrooms(family.getNumberOfBedrooms());
-        dto.setHabitabilityBuilding(family.getHabitabilityBuilding());
         dto.setStatus(family.getStatus());
+        dto.setCreated(family.getCreated());
+        dto.setDeleted(family.getDeleted());
         return dto;
     }
 
@@ -81,14 +74,9 @@ public class FamilyMapper {
         family.setDiseaseHistory(dto.getDiseaseHistory());
         family.setMedicalExam(dto.getMedicalExam());
         family.setTenure(dto.getTenure());
-        family.setTypeOfHousing(dto.getTypeOfHousing());
-        family.setHousingMaterial(dto.getHousingMaterial());
-        family.setHousingSecurity(dto.getHousingSecurity());
-        family.setHomeEnvironment(dto.getHomeEnvironment());
-        family.setBedroomNumber(dto.getBedroomNumber());
-        family.setHabitability(dto.getHabitability());
-        family.setNumberRooms(dto.getNumberRooms());
-        family.setNumberOfBedrooms(dto.getNumberOfBedrooms());
-        family.setHabitabilityBuilding(dto.getHabitabilityBuilding());
+        family.setStatus(dto.getStatus());
+        family.setCreated(dto.getCreated());
+        family.setDeleted(dto.getDeleted());
+        // No es necesario mapear serviceId y housingId aquí porque se manejarán en el servicio
     }
 }

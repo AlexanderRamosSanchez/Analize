@@ -16,37 +16,53 @@ public class FamilyService {
 
     private static final Logger logger = LoggerFactory.getLogger(FamilyService.class);
     private final BasicServiceRepository basicServiceRepository;
+    private final HousingDetailsRepository housingDetailsRepository;
     private final FamilyRepository familyRepository;
     private final FamilyEventService familyEventService;
     private final FamilyMapper familyMapper;
 
     @Autowired
     public FamilyService(BasicServiceRepository basicServiceRepository,
+                         HousingDetailsRepository housingDetailsRepository,
                          FamilyRepository familyRepository,
                          FamilyEventService familyEventService,
                          FamilyMapper familyMapper) {
         this.basicServiceRepository = basicServiceRepository;
+        this.housingDetailsRepository = housingDetailsRepository;
         this.familyRepository = familyRepository;
         this.familyEventService = familyEventService;
         this.familyMapper = familyMapper;
     }
 
     /**
-     * Mapea una entidad Family a un FamilyDTO incluyendo sus servicios básicos
+     * Mapea una entidad Family a un FamilyDTO incluyendo sus servicios básicos y detalles de vivienda
      */
     public Mono<FamilyDTO> mapToFamilyDTO(Family family) {
         FamilyDTO dto = familyMapper.toDTO(family);
 
-        if (family.getServiceId() != null) {
-            return basicServiceRepository.findById(family.getServiceId())
+        // Obtener servicios básicos si existen
+        Mono<FamilyDTO> withBasicService = family.getServiceId() != null
+                ? basicServiceRepository.findById(family.getServiceId())
                     .map(basicService -> {
                         dto.setBasicService(basicService);
                         return dto;
                     })
-                    .defaultIfEmpty(dto);
-        }
+                    .defaultIfEmpty(dto)
+                : Mono.just(dto);
 
-        return Mono.just(dto);
+        // Obtener detalles de vivienda si existen
+        Mono<FamilyDTO> withHousingDetails = withBasicService.flatMap(dtoWithService -> 
+            family.getHousingId() != null
+                ? housingDetailsRepository.findById(family.getHousingId())
+                    .map(housingDetails -> {
+                        dtoWithService.setHousingDetails(housingDetails);
+                        return dtoWithService;
+                    })
+                    .defaultIfEmpty(dtoWithService)
+                : Mono.just(dtoWithService)
+        );
+
+        return withHousingDetails;
     }
 
     /**
@@ -76,14 +92,27 @@ public class FamilyService {
     }
 
     /**
-     * Crea una nueva familia con sus servicios asociados
+     * Crea una nueva familia con sus servicios y detalles de vivienda asociados
      */
     public Mono<FamilyDTO> createFamily(FamilyDTO familyDTO) {
-        return createOrGetBasicService(familyDTO)
-                .flatMap(savedBasicService -> {
+        Mono<BasicService> basicServiceMono = createOrGetBasicService(familyDTO);
+        Mono<HousingDetails> housingDetailsMono = createOrGetHousingDetails(familyDTO);
+
+        return Mono.zip(basicServiceMono, housingDetailsMono)
+                .flatMap(tuple -> {
+                    BasicService savedBasicService = tuple.getT1();
+                    HousingDetails savedHousingDetails = tuple.getT2();
+
                     Family family = familyMapper.toEntity(familyDTO);
                     family.setStatus("A"); // Active by default
-                    family.setServiceId(savedBasicService.getServiceId());
+                    
+                    if (savedBasicService.getServiceId() != null) {
+                        family.setServiceId(savedBasicService.getServiceId());
+                    }
+                    
+                    if (savedHousingDetails.getId() != null) {
+                        family.setHousingId(savedHousingDetails.getId());
+                    }
 
                     return familyRepository.save(family)
                             .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "CREATED"))
@@ -96,18 +125,24 @@ public class FamilyService {
     }
 
     /**
-     * Actualiza una familia existente y sus servicios
+     * Actualiza una familia existente y sus servicios y detalles de vivienda
      */
     public Mono<FamilyDTO> updateFamily(Integer id, FamilyDTO familyDTO) {
         return familyRepository.findById(id)
                 .flatMap(existingFamily -> {
                     familyMapper.updateEntityFromDTO(existingFamily, familyDTO);
-                    Mono<Family> savedFamilyMono = familyRepository.save(existingFamily)
-                            .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "UPDATED"));
-
-                    return updateBasicServiceIfExists(existingFamily, familyDTO)
+                    
+                    Mono<Void> updateBasicServiceMono = updateBasicServiceIfExists(existingFamily, familyDTO)
                             .defaultIfEmpty(existingFamily)
-                            .then(savedFamilyMono);
+                            .then();
+                    
+                    Mono<Void> updateHousingDetailsMono = updateHousingDetailsIfExists(existingFamily, familyDTO)
+                            .defaultIfEmpty(existingFamily)
+                            .then();
+                    
+                    return Mono.when(updateBasicServiceMono, updateHousingDetailsMono)
+                            .then(familyRepository.save(existingFamily))
+                            .doOnSuccess(savedFamily -> familyEventService.publishFamilyEvent(savedFamily, "UPDATED"));
                 })
                 .flatMap(this::mapToFamilyDTO)
                 .onErrorResume(e -> {
@@ -161,6 +196,14 @@ public class FamilyService {
         }
     }
 
+    private Mono<HousingDetails> createOrGetHousingDetails(FamilyDTO familyDTO) {
+        if (familyDTO.getHousingDetails() != null) {
+            return housingDetailsRepository.save(familyDTO.getHousingDetails());
+        } else {
+            return Mono.just(HousingDetails.builder().build());
+        }
+    }
+
     private Mono<Family> updateBasicServiceIfExists(Family family, FamilyDTO familyDTO) {
         if (family.getServiceId() != null && familyDTO.getBasicService() != null) {
             return basicServiceRepository.findById(family.getServiceId())
@@ -168,6 +211,25 @@ public class FamilyService {
                         BasicServiceMapper.updateFromDTO(existingService, familyDTO.getBasicService());
                         return basicServiceRepository.save(existingService)
                                 .thenReturn(family);
+                    });
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Family> updateHousingDetailsIfExists(Family family, FamilyDTO familyDTO) {
+        if (family.getHousingId() != null && familyDTO.getHousingDetails() != null) {
+            return housingDetailsRepository.findById(family.getHousingId())
+                    .flatMap(existingHousing -> {
+                        HousingDetailsMapper.updateFromDTO(existingHousing, familyDTO.getHousingDetails());
+                        return housingDetailsRepository.save(existingHousing)
+                                .thenReturn(family);
+                    });
+        } else if (familyDTO.getHousingDetails() != null) {
+            // Si la familia no tiene un housingId pero se proporciona HousingDetails, crea uno nuevo
+            return housingDetailsRepository.save(familyDTO.getHousingDetails())
+                    .map(savedHousing -> {
+                        family.setHousingId(savedHousing.getId());
+                        return family;
                     });
         }
         return Mono.empty();

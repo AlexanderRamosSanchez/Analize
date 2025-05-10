@@ -1,5 +1,8 @@
 package pe.edu.vallegrande.database.dto;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+
 import lombok.Data;
 import pe.edu.vallegrande.database.model.*;
 
@@ -21,16 +24,10 @@ public class FamilyDTO {
     private String diseaseHistory;
     private String medicalExam;
     private String tenure;
-    private String typeOfHousing;
-    private String housingMaterial;
-    private String housingSecurity;
-    private Integer homeEnvironment;
-    private Integer bedroomNumber;
-    private String habitability;
-    private Integer numberRooms;
-    private Integer numberOfBedrooms;
-    private String habitabilityBuilding;
     private String status;
+    private LocalDateTime created;
+    private LocalDateTime deleted;
 
     private BasicService basicService;
+    private HousingDetails housingDetails;
 }

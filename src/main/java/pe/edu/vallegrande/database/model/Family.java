@@ -1,6 +1,10 @@
 package pe.edu.vallegrande.database.model;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 import lombok.Data;
 
@@ -24,15 +28,13 @@ public class Family {
     private String diseaseHistory;
     private String medicalExam;
     private String tenure;
-    private String typeOfHousing;
-    private String housingMaterial;
-    private String housingSecurity;
-    private Integer homeEnvironment;
-    private Integer bedroomNumber;
-    private String habitability;
-    private Integer numberRooms;
-    private Integer numberOfBedrooms;
-    private String habitabilityBuilding;
     private Integer serviceId;
+    private Integer housingId;
     private String status;
+
+    @Column("created_at")
+    private LocalDateTime created;
+
+    @Column("deleted_at")
+    private LocalDateTime deleted;
 }
