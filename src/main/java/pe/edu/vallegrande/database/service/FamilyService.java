@@ -51,7 +51,7 @@ public class FamilyService {
                 : Mono.just(dto);
 
         // Obtener detalles de vivienda si existen
-        Mono<FamilyDTO> withHousingDetails = withBasicService.flatMap(dtoWithService -> 
+        return withBasicService.flatMap(dtoWithService -> 
             family.getHousingId() != null
                 ? housingDetailsRepository.findById(family.getHousingId())
                     .map(housingDetails -> {
@@ -61,8 +61,6 @@ public class FamilyService {
                     .defaultIfEmpty(dtoWithService)
                 : Mono.just(dtoWithService)
         );
-
-        return withHousingDetails;
     }
 
     /**

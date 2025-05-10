@@ -1,6 +1,5 @@
 package pe.edu.vallegrande.database.dto;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import lombok.Data;

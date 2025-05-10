@@ -1,6 +1,5 @@
 package pe.edu.vallegrande.database.model;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
